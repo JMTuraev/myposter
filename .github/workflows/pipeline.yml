@@ -28,15 +28,28 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Read the GitHub issue carefully.
-            Clone the website from the URL in the issue.
-            Build it with React and Tailwind CSS.
-            Create firebase.json for hosting.
-            Run: npm install && npm run build
-            Deploy to Firebase using project: ${{ secrets.FIREBASE_PROJECT_ID }}
+            Read the GitHub issue and find the website URL.
+            Clone that website design with React + Tailwind CSS.
+            Create a complete React project in /project folder.
+            IMPORTANT: Also create these files:
+            1. /project/firebase.json with this content:
+            {
+              "hosting": {
+                "public": "build",
+                "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+              }
+            }
+            2. /project/.firebaserc with this content:
+            {
+              "projects": {
+                "default": "${{ secrets.FIREBASE_PROJECT_ID }}"
+              }
+            }
+            Then run: cd project && npm install && npm run build
 
       - name: Deploy to Firebase
         run: |
+          cd project
           firebase deploy --only hosting \
             --project ${{ secrets.FIREBASE_PROJECT_ID }}
         env:
