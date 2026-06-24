@@ -1,0 +1,42 @@
+name: Claude Auto Builder
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Claude Agent
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Read the GitHub issue carefully.
+            Clone the website from the URL in the issue.
+            Build it with React and Tailwind CSS.
+            Create firebase.json for hosting.
+            Run: npm install && npm run build
+            Deploy to Firebase using project: ${{ secrets.FIREBASE_PROJECT_ID }}
+
+      - name: Deploy to Firebase
+        run: |
+          firebase deploy --only hosting \
+            --project ${{ secrets.FIREBASE_PROJECT_ID }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
