@@ -30,22 +30,28 @@ jobs:
           prompt: |
             Read the GitHub issue and find the website URL.
             Clone that website with React + Tailwind CSS.
-            Create a complete React app in current directory.
-            Create package.json, src/App.jsx, src/index.js, public/index.html, tailwind.config.js.
-            Run: npm install && npm run build
+            Create these files in current directory:
+            - package.json (with react, react-dom, react-scripts, tailwindcss)
+            - public/index.html
+            - src/index.js
+            - src/App.jsx (clone the website design)
+            - tailwind.config.js
+            DO NOT run npm install or npm run build.
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React app
+        run: npm run build
 
       - name: Create Firebase config files
         run: |
           echo '{"hosting":{"public":"build","ignore":["firebase.json","**/.*","**/node_modules/**"]}}' > firebase.json
           echo '{"projects":{"default":"${{ secrets.FIREBASE_PROJECT_ID }}"}}' > .firebaserc
 
-      - name: Setup Firebase credentials
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/service-account.json
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
-
       - name: Deploy to Firebase
         run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/service-account.json
           firebase deploy --only hosting \
             --project ${{ secrets.FIREBASE_PROJECT_ID }}
